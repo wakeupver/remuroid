@@ -182,8 +182,6 @@ private:
     unsigned int videoBaseHeight = 1;
     bool dirtyVideo = false;
 
-
-
     std::mutex coreLock;
 
     std::unique_ptr<Core> core;
