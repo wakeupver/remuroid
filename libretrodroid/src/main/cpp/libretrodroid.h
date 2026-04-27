@@ -182,6 +182,11 @@ private:
     unsigned int videoBaseHeight = 1;
     bool dirtyVideo = false;
 
+    static constexpr unsigned FPS_RECHECK_WARMUP = 120;
+    unsigned fpsRecheckFrames = 0;
+    bool fpsRecheckDone = false;
+    double initialContentFps = 0.0;
+
     std::mutex coreLock;
 
     std::unique_ptr<Core> core;

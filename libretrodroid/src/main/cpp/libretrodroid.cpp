@@ -498,6 +498,7 @@ void LibretroDroid::step() {
              newFps, newSampleRate);
 
         fpsSync = std::make_unique<FPSSync>(newFps, screenRefreshRate);
+        fpsRecheckDone = true;
 
         double inputSampleRate = newSampleRate * fpsSync->getTimeStretchFactor();
         audio = std::make_unique<Audio>(
@@ -507,6 +508,41 @@ void LibretroDroid::step() {
         );
         updateAudioSampleRateMultiplier();
         audio->start();
+    }
+
+    // Proactive fps recheck: after FPS_RECHECK_WARMUP frames, re-query
+    // retro_get_system_av_info() to catch cores that update their internal
+    // framerate after loading content but never send SET_SYSTEM_AV_INFO
+    // (e.g. Flycast without detect_framerate_change, or any core that silently
+    // corrects its fps post-load).  If the reported fps has drifted by more
+    // than 2 Hz from the value used when fpsSync was first created, recreate
+    // fpsSync and audio exactly as the SET_SYSTEM_AV_INFO path does.
+    if (!fpsRecheckDone && frames > 0) {
+        ++fpsRecheckFrames;
+        if (fpsRecheckFrames >= FPS_RECHECK_WARMUP) {
+            fpsRecheckDone = true;
+
+            struct retro_system_av_info recheckInfo {};
+            core->retro_get_system_av_info(&recheckInfo);
+            double recheckFps        = recheckInfo.timing.fps;
+            double recheckSampleRate = recheckInfo.timing.sample_rate;
+
+            if (recheckFps > 0.0 && std::abs(recheckFps - initialContentFps) > 2.0) {
+                LOGI("fps recheck: initial=%.3f rechecked=%.3f — recreating fpsSync and audio",
+                     initialContentFps, recheckFps);
+
+                fpsSync = std::make_unique<FPSSync>(recheckFps, screenRefreshRate);
+
+                double inputSampleRate = recheckSampleRate * fpsSync->getTimeStretchFactor();
+                audio = std::make_unique<Audio>(
+                    (int32_t) std::lround(inputSampleRate),
+                    recheckFps,
+                    preferLowLatencyAudio
+                );
+                updateAudioSampleRateMultiplier();
+                audio->start();
+            }
+        }
     }
 
     if (video && Environment::getInstance().isScreenRotationUpdated()) {
@@ -646,6 +682,9 @@ void LibretroDroid::afterGameLoad() {
     core->retro_get_system_av_info(&system_av_info);
 
     fpsSync = std::make_unique<FPSSync>(system_av_info.timing.fps, screenRefreshRate);
+    initialContentFps = system_av_info.timing.fps;
+    fpsRecheckFrames  = 0;
+    fpsRecheckDone    = false;
 
     double inputSampleRate = system_av_info.timing.sample_rate * fpsSync->getTimeStretchFactor();
 
