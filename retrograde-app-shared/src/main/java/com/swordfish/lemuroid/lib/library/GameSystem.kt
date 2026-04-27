@@ -1240,6 +1240,7 @@ data class GameSystem(
                                     CoreVariable("reicast_internal_resolution", "640x480"),
                                     CoreVariable("reicast_alpha_sorting", "per-triangle (normal)"),
                                     CoreVariable("reicast_threaded_rendering", "disabled"),
+                                    CoreVariable("reicast_detect_framerate_change", "enabled"),
                                 ),
                             statesVersion = 1,
                         ),
