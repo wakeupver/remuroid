@@ -78,7 +78,14 @@ fun ZipInputStream.extractEntryToFile(
 
 fun File.isZipped() = extension == "zip"
 
-fun DocumentFile.isZipped() = type == "application/zip"
+/** Returns true for any zip file, checking both MIME type and filename extension.
+ *  Android can report various MIME types for zip files (application/zip,
+ *  application/x-zip-compressed, application/octet-stream, etc.) depending on
+ *  the device / file manager / SAF provider, so extension is the reliable fallback. */
+fun DocumentFile.isZipped() =
+    type == "application/zip" ||
+        type == "application/x-zip-compressed" ||
+        name?.endsWith(".zip", ignoreCase = true) == true
 
 /** Returns the uncompressed input stream if gzip compressed. */
 private fun InputStream.uncompressedInputStream(): InputStream {

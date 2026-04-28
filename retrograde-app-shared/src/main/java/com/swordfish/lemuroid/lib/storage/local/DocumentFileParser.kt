@@ -2,6 +2,7 @@ package com.swordfish.lemuroid.lib.storage.local
 
 import android.content.Context
 import com.swordfish.lemuroid.common.kotlin.toStringCRC32
+import com.swordfish.lemuroid.lib.library.GameSystem
 import com.swordfish.lemuroid.lib.storage.BaseStorageFile
 import com.swordfish.lemuroid.lib.storage.StorageFile
 import com.swordfish.lemuroid.lib.storage.scanner.SerialScanner
@@ -63,10 +64,15 @@ object DocumentFileParser {
 
         val diskInfo = SerialScanner.extractInfo(entry.name, zipInputStream)
 
+        // entry.crc is 0 for streaming zips that use data descriptors (the CRC is written
+        // *after* the file data). Pass null so metadata lookup skips the CRC query rather
+        // than looking up the meaningless value "00000000".
+        val crc = if (entry.crc != 0L) entry.crc.toStringCRC32() else null
+
         return StorageFile(
             entry.name,
             entry.size,
-            entry.crc.toStringCRC32(),
+            crc,
             diskInfo.serial,
             baseStorageFile.uri,
             baseStorageFile.uri.path,
@@ -133,7 +139,10 @@ object DocumentFileParser {
     /* Finds a zip entry which we assume is a game. Lemuroid only supports single archive games,
        so we are looking for an entry which occupies a large percentage of the archive space.
        This is very fast heuristic to compute and avoids reading the whole stream in most
-       scenarios.*/
+       scenarios.
+       Fallback: when the compressed size is unknown (value -1, common with streaming zip tools
+       that write data descriptors after file data), we accept the entry if its extension matches
+       a known game ROM extension. */
     fun findGameEntry(
         openedInputStream: ZipInputStream,
         fileSize: Long = -1,
@@ -150,7 +159,26 @@ object DocumentFileParser {
         entry: ZipEntry,
         fileSize: Long,
     ): Boolean {
-        if (fileSize <= 0 || entry.compressedSize <= 0) return false
-        return (entry.compressedSize.toFloat() / fileSize.toFloat()) > SINGLE_ARCHIVE_THRESHOLD
+        if (entry.isDirectory) return false
+
+        // Primary heuristic: the compressed entry should occupy a large fraction of the zip.
+        // This is fast and avoids reading any data.
+        if (fileSize > 0 && entry.compressedSize > 0) {
+            return (entry.compressedSize.toFloat() / fileSize.toFloat()) > SINGLE_ARCHIVE_THRESHOLD
+        }
+
+        // Fallback for streaming zips: compressedSize is -1 when the local file header omits
+        // it (data descriptor written after file data, common with many zip tools). In that
+        // case we trust the entry's file extension instead.
+        val ext = entry.name.substringAfterLast('.', "").lowercase(java.util.Locale.ROOT)
+        return ext.isNotEmpty() && ext != "zip" && knownRomExtensions.contains(ext)
+    }
+
+    // Lazy set of all game extensions known to Lemuroid, excluding "zip" itself.
+    // Used as fallback when a zip entry's compressedSize is unknown (streaming zips).
+    private val knownRomExtensions: Set<String> by lazy {
+        GameSystem.getSupportedExtensions()
+            .filterNot { it == "zip" }
+            .toHashSet()
     }
 }
