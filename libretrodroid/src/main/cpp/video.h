@@ -116,7 +116,7 @@ private:
     ImmersiveMode immersiveMode;
     VideoLayout videoLayout;
 
-    std::unique_ptr<Renderer> renderer;
+    Renderer* renderer;
 };
 
 }

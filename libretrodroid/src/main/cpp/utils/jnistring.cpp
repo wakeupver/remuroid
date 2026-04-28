@@ -27,7 +27,7 @@ JniString::~JniString() {
 }
 
 const char* JniString::cString() {
-    return nativeString;
+    return strdup(nativeString);
 }
 
 std::string JniString::stdString() {

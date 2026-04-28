@@ -19,7 +19,7 @@
 
 libretrodroid::FDWrapper::~FDWrapper() {
     if (fd > 0) {
-        ::close(fd);
+        close(fd);
         fd = -1;
     }
 }

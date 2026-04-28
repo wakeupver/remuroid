@@ -68,11 +68,11 @@ public:
     void setCheat(unsigned index, bool enabled, const std::string& code);
     void resetCheat();
 
-    std::vector<int8_t> serializeState();
-    bool unserializeState(const int8_t *data, size_t size);
+    std::pair<int8_t*, size_t> serializeState();
+    bool unserializeState(int8_t *data, size_t size);
 
-    std::vector<int8_t> serializeSRAM();
-    bool unserializeSRAM(const int8_t *data, size_t size);
+    std::pair<int8_t *, size_t> serializeSRAM();
+    jboolean unserializeSRAM(int8_t *data, size_t size);
 
     void onSurfaceCreated();
     void onSurfaceChanged(unsigned int width, unsigned int height);

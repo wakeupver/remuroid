@@ -37,16 +37,20 @@
 #include "rumble.h"
 #include "shadermanager.h"
 #include "utils/javautils.h"
-#include "utils/libretrodroidexception.h"
 #include "errorcodes.h"
 #include "environment.h"
 #include "renderers/es3/framebufferrenderer.h"
 #include "renderers/es2/imagerendereres2.h"
 #include "renderers/es3/imagerendereres3.h"
 #include "utils/jnistring.h"
-#include "../../libretro-common/include/libretro.h"
 
 namespace libretrodroid {
+
+extern "C" {
+#include "utils/utils.h"
+#include "../../libretro-common/include/libretro.h"
+#include "utils/libretrodroidexception.h"
+}
 
 extern "C" {
 
@@ -172,12 +176,11 @@ JNIEXPORT jboolean JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_unseri
 ) {
     try {
         jboolean isCopy = JNI_FALSE;
-        const jbyte* data = env->GetByteArrayElements(state, &isCopy);
+        jbyte* data = env->GetByteArrayElements(state, &isCopy);
         jsize size = env->GetArrayLength(state);
 
-        bool result = LibretroDroid::getInstance().unserializeState(
-            reinterpret_cast<const int8_t*>(data), static_cast<size_t>(size));
-        env->ReleaseByteArrayElements(state, const_cast<jbyte*>(data), JNI_ABORT);
+        bool result = LibretroDroid::getInstance().unserializeState(data, size);
+        env->ReleaseByteArrayElements(state, data, JNI_ABORT);
 
         return result ? JNI_TRUE : JNI_FALSE;
 
@@ -193,15 +196,18 @@ JNIEXPORT jbyteArray JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_seri
     jclass obj
 ) {
     try {
-        auto data = LibretroDroid::getInstance().serializeState();
-        jbyteArray result = env->NewByteArray(static_cast<jsize>(data.size()));
-        env->SetByteArrayRegion(result, 0, static_cast<jsize>(data.size()),
-            reinterpret_cast<const jbyte*>(data.data()));
+        auto [data, size] = LibretroDroid::getInstance().serializeState();
+
+        jbyteArray result = env->NewByteArray(size);
+        env->SetByteArrayRegion(result, 0, size, data);
+
         return result;
+
     } catch (std::exception &exception) {
         LOGE("Error in serializeState: %s", exception.what());
         JavaUtils::throwRetroException(env, ERROR_SERIALIZATION);
     }
+
     return nullptr;
 }
 
@@ -240,20 +246,20 @@ JNIEXPORT jboolean JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_unseri
 ) {
     try {
         jboolean isCopy = JNI_FALSE;
-        const jbyte* data = env->GetByteArrayElements(sram, &isCopy);
+        jbyte* data = env->GetByteArrayElements(sram, &isCopy);
         jsize size = env->GetArrayLength(sram);
 
-        bool result = LibretroDroid::getInstance().unserializeSRAM(
-            reinterpret_cast<const int8_t*>(data), static_cast<size_t>(size));
-        env->ReleaseByteArrayElements(sram, const_cast<jbyte*>(data), JNI_ABORT);
+        LibretroDroid::getInstance().unserializeSRAM(data, size);
 
-        return result ? JNI_TRUE : JNI_FALSE;
+        env->ReleaseByteArrayElements(sram, data, JNI_ABORT);
 
     } catch (std::exception &exception) {
         LOGE("Error in unserializeSRAM: %s", exception.what());
         JavaUtils::throwRetroException(env, ERROR_SERIALIZATION);
         return JNI_FALSE;
     }
+
+    return JNI_TRUE;
 }
 
 JNIEXPORT jbyteArray JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_serializeSRAM(
@@ -261,15 +267,18 @@ JNIEXPORT jbyteArray JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_seri
     jclass obj
 ) {
     try {
-        auto data = LibretroDroid::getInstance().serializeSRAM();
-        jbyteArray result = env->NewByteArray(static_cast<jsize>(data.size()));
-        env->SetByteArrayRegion(result, 0, static_cast<jsize>(data.size()),
-            reinterpret_cast<const jbyte*>(data.data()));
+        auto [data, size] = LibretroDroid::getInstance().serializeSRAM();
+
+        jbyteArray result = env->NewByteArray(size);
+        env->SetByteArrayRegion(result, 0, size, (jbyte *) data);
+
         return result;
+
     } catch (std::exception &exception) {
         LOGE("Error in serializeSRAM: %s", exception.what());
         JavaUtils::throwRetroException(env, ERROR_SERIALIZATION);
     }
+
     return nullptr;
 }
 
@@ -428,14 +437,15 @@ JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_loadGameFr
     jbyteArray gameFileBytes
 ) {
     try {
-        jboolean isCopy = JNI_FALSE;
-        const jbyte* data = env->GetByteArrayElements(gameFileBytes, &isCopy);
-        jsize size = env->GetArrayLength(gameFileBytes);
-
-        LibretroDroid::getInstance().loadGameFromBytes(
-            reinterpret_cast<const int8_t*>(data), static_cast<size_t>(size));
-
-        env->ReleaseByteArrayElements(gameFileBytes, const_cast<jbyte*>(data), JNI_ABORT);
+        size_t size = env->GetArrayLength(gameFileBytes);
+        auto* data = new int8_t[size];
+        env->GetByteArrayRegion(
+            gameFileBytes,
+            0,
+            size,
+            reinterpret_cast<int8_t*>(data)
+        );
+        LibretroDroid::getInstance().loadGameFromBytes(data, size);
     } catch (std::exception &exception) {
         LOGE("Error in loadGameFromBytes: %s", exception.what());
         JavaUtils::throwRetroException(env, ERROR_LOAD_GAME);
