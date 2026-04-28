@@ -25,7 +25,7 @@ std::vector<char> Utils::readFileAsBytes(int fileDescriptor) {
     FILE* file = fdopen(fileDescriptor, "r");
     if (!file) {
         LOGE("fdopen failed for fd %d", fileDescriptor);
-        close(fileDescriptor);
+        ::close(fileDescriptor);
         return {};
     }
     size_t size = getFileSize(file);
