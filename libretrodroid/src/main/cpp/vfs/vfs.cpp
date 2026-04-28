@@ -92,7 +92,7 @@ int64_t VFS::truncate(struct retro_vfs_file_handle* stream, int64_t length) {
 }
 
 retro_vfs_interface * VFS::getInterface() {
-    return new retro_vfs_interface {
+    static retro_vfs_interface iface {
         /* Introduced in VFS API v1 */
         &VFS::path,
         &VFS::open,
@@ -109,6 +109,7 @@ retro_vfs_interface * VFS::getInterface() {
         /* Introduced in VFS API v2 */
         &VFS::truncate
     };
+    return &iface;
 }
 
 void VFS::initialize(std::vector<VFSFile> files) {
@@ -120,34 +121,40 @@ void VFS::deinitialize() {
 }
 
 struct retro_vfs_file_handle* VFS::virtualOpen(const char *path, unsigned int mode, unsigned int hints) {
-    LOGV("VFS Calling open: %s %i", path, mode);
+    LOGV("VFS Calling virtualOpen: %s %u", path, mode);
 
     VFSFile* virtualFile = findVirtualFile(path);
+    if (!virtualFile) return nullptr;
 
-    if (virtualFile == nullptr) {
+    LOGD("VFS Performing virtual file open: %s", virtualFile->getFileName().c_str());
+
+    int duplicateFD = dup(virtualFile->getFD());
+    if (duplicateFD < 0) {
+        LOGE("VFS dup() failed for path %s", path);
         return nullptr;
     }
 
-    LOGD("VFS Performing virtual file open: %s", virtualFile->getFileName().data());
-
-    auto stream = new retro_vfs_file_handle;
-
-    int duplicateFD = dup(virtualFile->getFD());
     FILE* file = fdopen(duplicateFD, "rb");
+    if (!file) {
+        LOGE("VFS fdopen() failed for path %s", path);
+        close(duplicateFD);
+        return nullptr;
+    }
+
     size_t size = Utils::getFileSize(file);
+    LOGV("VFS Virtual file size: %zu", size);
 
-    LOGV("VFS Virtual file size: %i", size);
-
-    stream->fd = duplicateFD;
-    stream->hints = hints;
-    stream->size = size;
-    stream->buf = nullptr;
-    stream->fp = file;
-    stream->orig_path = strdup(virtualFile->getFileName().data());
-    stream->mappos = 0;
-    stream->mapsize = 0;
-    stream->mapped = nullptr;
-    stream->scheme = VFS_SCHEME_NONE;
+    auto* stream = new retro_vfs_file_handle;
+    stream->fd         = duplicateFD;
+    stream->hints      = hints;
+    stream->size       = static_cast<int64_t>(size);
+    stream->buf        = nullptr;
+    stream->fp         = file;
+    stream->orig_path  = strdup(virtualFile->getFileName().c_str());
+    stream->mappos     = 0;
+    stream->mapsize    = 0;
+    stream->mapped     = nullptr;
+    stream->scheme     = VFS_SCHEME_NONE;
 
     return stream;
 }

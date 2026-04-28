@@ -18,19 +18,15 @@
 #ifndef LIBRETRODROID_UTILS_H
 #define LIBRETRODROID_UTILS_H
 
+#include <string>
+#include <vector>
+
 namespace libretrodroid {
 
 class Utils {
 public:
-    struct ReadResult {
-        size_t size;
-        char* data;
-    };
-
-    static ReadResult readFileAsBytes(const std::string &filePath);
-    static ReadResult readFileAsBytes(const int fileDescriptor);
-
-    static const char* cloneToCString(const std::string &input);
+    static std::vector<char> readFileAsBytes(const std::string &filePath);
+    static std::vector<char> readFileAsBytes(int fileDescriptor);
 
     static size_t getFileSize(FILE* file);
 };
