@@ -219,6 +219,9 @@ class GameViewModelRetroGameView(
                 is RomFiles.Standard -> {
                     gameFilePath = gameFiles.files.first().absolutePath
                 }
+                is RomFiles.Bytes -> {
+                    gameFileBytes = gameFiles.bytes
+                }
             }
 
             systemDirectory = gameData.systemDirectory.absolutePath

@@ -76,6 +76,20 @@ fun ZipInputStream.extractEntryToFile(
     }
 }
 
+/** Extracts a zip entry to a ByteArray in memory. No disk write — suitable for
+ *  cores that accept game data via [GLRetroViewData.gameFileBytes]. */
+fun ZipInputStream.extractEntryToBytes(entryName: String): ByteArray {
+    this.use { inputStream ->
+        while (true) {
+            val entry = inputStream.nextEntry ?: break
+            if (entry.name == entryName) {
+                return inputStream.readBytes()
+            }
+        }
+        throw IllegalArgumentException("Entry '$entryName' not found in zip")
+    }
+}
+
 fun File.isZipped() = extension == "zip"
 
 /** Returns true for any zip file, checking both MIME type and filename extension.

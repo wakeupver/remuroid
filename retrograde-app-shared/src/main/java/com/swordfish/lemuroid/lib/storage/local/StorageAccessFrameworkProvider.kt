@@ -6,7 +6,7 @@ import android.os.Environment
 import android.provider.DocumentsContract
 import androidx.documentfile.provider.DocumentFile
 import androidx.leanback.preference.LeanbackPreferenceFragment
-import com.swordfish.lemuroid.common.kotlin.extractEntryToFile
+import com.swordfish.lemuroid.common.kotlin.extractEntryToBytes
 import com.swordfish.lemuroid.common.kotlin.isZipped
 import com.swordfish.lemuroid.common.kotlin.writeToFile
 import com.swordfish.lemuroid.lib.R
@@ -136,10 +136,21 @@ class StorageAccessFrameworkProvider(private val context: Context) : StorageProv
         val isZipped = originalDocument.isZipped() && originalDocument.name != game.fileName
 
         return if (isZipped && dataFiles.isEmpty()) {
-            getGameRomFilesZipped(game, originalDocument)
+            getGameRomFilesAsBytes(game, originalDocument)
         } else {
             getGameRomFilesStandard(game, dataFiles, originalDocument)
         }
+    }
+
+    /** Extracts the ROM entry from the zip directly into memory — no cache file written. */
+    private fun getGameRomFilesAsBytes(
+        game: Game,
+        originalDocument: DocumentFile,
+    ): RomFiles {
+        val stream = ZipInputStream(
+            context.contentResolver.openInputStream(originalDocument.uri),
+        )
+        return RomFiles.Bytes(stream.extractEntryToBytes(game.fileName), game.fileName)
     }
 
     private fun getGameRomFilesStandard(
@@ -150,23 +161,6 @@ class StorageAccessFrameworkProvider(private val context: Context) : StorageProv
         val gameEntry = getGameRomStandard(game, originalDocument)
         val dataEntries = dataFiles.map { getDataFileStandard(game, it) }
         return RomFiles.Standard(listOf(gameEntry) + dataEntries)
-    }
-
-    private fun getGameRomFilesZipped(
-        game: Game,
-        originalDocument: DocumentFile,
-    ): RomFiles {
-        val cacheFile = GameCacheUtils.getCacheFileForGame(SAF_CACHE_SUBFOLDER, context, game)
-        if (cacheFile.exists()) {
-            return RomFiles.Standard(listOf(cacheFile))
-        }
-
-        val stream =
-            ZipInputStream(
-                context.contentResolver.openInputStream(originalDocument.uri),
-            )
-        stream.extractEntryToFile(game.fileName, cacheFile)
-        return RomFiles.Standard(listOf(cacheFile))
     }
 
     private fun getDataFileStandard(
