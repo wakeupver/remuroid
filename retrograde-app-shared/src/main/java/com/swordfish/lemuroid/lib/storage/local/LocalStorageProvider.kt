@@ -23,7 +23,6 @@ import android.content.Context
 import android.net.Uri
 import androidx.core.net.toUri
 import androidx.leanback.preference.LeanbackPreferenceFragment
-import com.swordfish.lemuroid.common.kotlin.extractEntryToBytes
 import com.swordfish.lemuroid.common.kotlin.extractEntryToFile
 import com.swordfish.lemuroid.common.kotlin.isZipped
 import com.swordfish.lemuroid.lib.R
@@ -118,18 +117,6 @@ class LocalStorageProvider(
         game: Game,
         dataFiles: List<DataFile>,
     ): RomFiles {
-        val gamePath = Uri.parse(game.fileUri).path
-        val originalFile = File(gamePath)
-
-        // For zipped single-file cartridge ROMs, extract directly to memory — no cache write.
-        // Multi-file games (dataFiles non-empty, e.g. PS1 bin/cue) fall through to Standard
-        // because their cores require filesystem paths (need_fullpath = true).
-        if (originalFile.isZipped() && originalFile.name != game.fileName && dataFiles.isEmpty()) {
-            val stream = ZipInputStream(originalFile.inputStream())
-            val bytes = stream.extractEntryToBytes(game.fileName)
-            return RomFiles.Bytes(bytes, game.fileName)
-        }
-
         return RomFiles.Standard(listOf(getGameRom(game)) + dataFiles.map { getDataFile(it) })
     }
 

@@ -76,30 +76,9 @@ fun ZipInputStream.extractEntryToFile(
     }
 }
 
-/** Extracts a zip entry to a ByteArray in memory. No disk write — suitable for
- *  cores that accept game data via [GLRetroViewData.gameFileBytes]. */
-fun ZipInputStream.extractEntryToBytes(entryName: String): ByteArray {
-    this.use { inputStream ->
-        while (true) {
-            val entry = inputStream.nextEntry ?: break
-            if (entry.name == entryName) {
-                return inputStream.readBytes()
-            }
-        }
-        throw IllegalArgumentException("Entry '$entryName' not found in zip")
-    }
-}
-
 fun File.isZipped() = extension == "zip"
 
-/** Returns true for any zip file, checking both MIME type and filename extension.
- *  Android can report various MIME types for zip files (application/zip,
- *  application/x-zip-compressed, application/octet-stream, etc.) depending on
- *  the device / file manager / SAF provider, so extension is the reliable fallback. */
-fun DocumentFile.isZipped() =
-    type == "application/zip" ||
-        type == "application/x-zip-compressed" ||
-        name?.endsWith(".zip", ignoreCase = true) == true
+fun DocumentFile.isZipped() = type == "application/zip"
 
 /** Returns the uncompressed input stream if gzip compressed. */
 private fun InputStream.uncompressedInputStream(): InputStream {
