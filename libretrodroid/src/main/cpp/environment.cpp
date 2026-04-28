@@ -83,19 +83,22 @@ void Environment::updateVariable(const std::string& key, const std::string& valu
 }
 
 bool Environment::environment_handle_set_variables(const struct retro_variable* received) {
-    unsigned count = 0;
-    while (received[count].key != nullptr) {
+    if (!received) return false;
+
+    for (unsigned count = 0; received[count].key != nullptr; ++count) {
         LOGD("Received variable %s: %s", received[count].key, received[count].value);
 
         std::string key(received[count].key);
         std::string description(received[count].value);
         std::string value(received[count].value);
 
-        auto firstValueStart = value.find(';') + 2;
+        auto firstValueStart = value.find(';');
+        if (firstValueStart == std::string::npos) continue;
+        firstValueStart += 2;
         auto firstValueEnd = value.find('|', firstValueStart);
         value = value.substr(firstValueStart, firstValueEnd - firstValueStart);
 
-        auto currentVariable = variables[key];
+        auto& currentVariable = variables[key];
         currentVariable.key = key;
         currentVariable.description = description;
 
@@ -103,10 +106,7 @@ bool Environment::environment_handle_set_variables(const struct retro_variable* 
             currentVariable.value = value;
         }
 
-        variables[key] = currentVariable;
         LOGD("Assigning variable %s: %s", currentVariable.key.c_str(), currentVariable.value.c_str());
-
-        count++;
     }
 
     return true;
@@ -212,8 +212,8 @@ bool Environment::callback_set_rumble_state(unsigned port, enum retro_rumble_eff
 }
 
 bool Environment::handle_callback_set_rumble_state(unsigned port, enum retro_rumble_effect effect, uint16_t strength) {
-    LOGV("Setting rumble strength for port %i to %i", port, strength);
-    if (port < 0 || port > 3) return false;
+    LOGV("Setting rumble strength for port %u to %u", port, strength);
+    if (port > 3) return false;
 
     if (effect == RETRO_RUMBLE_STRONG) {
         rumbleStates[port].strengthStrong = strength;
@@ -465,22 +465,15 @@ double Environment::getGameTimingSampleRate() const {
 
 const std::vector<struct Variable> Environment::getVariables() const {
     std::vector<struct Variable> result;
+    result.reserve(variables.size());
 
-    std::for_each(
-        variables.begin(),
-        variables.end(),
-        [&](std::pair<std::string, struct Variable> item) {
-            result.push_back(item.second);
-        }
-    );
+    for (const auto& kv : variables) {
+        result.push_back(kv.second);
+    }
 
-    std::sort(
-        result.begin(),
-        result.end(),
-        [](struct Variable v1, struct Variable v2) {
-            return v1.key < v2.key;
-        }
-    );
+    std::sort(result.begin(), result.end(), [](const Variable& v1, const Variable& v2) {
+        return v1.key < v2.key;
+    });
 
     return result;
 }

@@ -39,38 +39,33 @@ static void printGLString(const char *name, GLenum s) {
 
 GLuint loadShader(GLenum shaderType, const char* pSource) {
     GLuint shader = glCreateShader(shaderType);
-    if (shader) {
-        glShaderSource(shader, 1, &pSource, nullptr);
-        glCompileShader(shader);
-        GLint compiled = 0;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-        if (!compiled) {
-            GLint infoLen = 0;
-            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
-            if (infoLen) {
-                char* buf = (char*) malloc(infoLen);
-                if (buf) {
-                    glGetShaderInfoLog(shader, infoLen, nullptr, buf);
-                    LOGE("Could not compile shader %d:\n%s\n",
-                         shaderType, buf);
-                    free(buf);
-                }
-                glDeleteShader(shader);
-                shader = 0;
-            }
+    if (!shader) return 0;
+
+    glShaderSource(shader, 1, &pSource, nullptr);
+    glCompileShader(shader);
+    GLint compiled = 0;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    if (!compiled) {
+        GLint infoLen = 0;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
+        if (infoLen > 0) {
+            std::string buf(static_cast<size_t>(infoLen), '\0');
+            glGetShaderInfoLog(shader, infoLen, nullptr, buf.data());
+            LOGE("Could not compile shader %d:\n%s\n", shaderType, buf.c_str());
         }
+        glDeleteShader(shader);
+        return 0;
     }
     return shader;
 }
 
 GLuint createProgram(const char* pVertexSource, const char* pFragmentSource) {
     GLuint vertexShader = loadShader(GL_VERTEX_SHADER, pVertexSource);
-    if (!vertexShader) {
-        return 0;
-    }
+    if (!vertexShader) return 0;
 
     GLuint pixelShader = loadShader(GL_FRAGMENT_SHADER, pFragmentSource);
     if (!pixelShader) {
+        glDeleteShader(vertexShader);
         return 0;
     }
 
@@ -84,18 +79,17 @@ GLuint createProgram(const char* pVertexSource, const char* pFragmentSource) {
         if (linkStatus != GL_TRUE) {
             GLint bufLength = 0;
             glGetProgramiv(program, GL_INFO_LOG_LENGTH, &bufLength);
-            if (bufLength) {
-                char* buf = (char*) malloc(bufLength);
-                if (buf) {
-                    glGetProgramInfoLog(program, bufLength, nullptr, buf);
-                    LOGE("Could not link program:\n%s\n", buf);
-                    free(buf);
-                }
+            if (bufLength > 0) {
+                std::string buf(static_cast<size_t>(bufLength), '\0');
+                glGetProgramInfoLog(program, bufLength, nullptr, buf.data());
+                LOGE("Could not link program:\n%s\n", buf.c_str());
             }
             glDeleteProgram(program);
             program = 0;
         }
     }
+    glDeleteShader(vertexShader);
+    glDeleteShader(pixelShader);
     return program;
 }
 
@@ -309,7 +303,7 @@ void Video::initializeRenderer(RenderingOptions renderingOptions) {
     auto shaders = ShaderManager::getShader(requestedShaderConfig);
 
     if (renderingOptions.hardwareAccelerated) {
-        renderer = new FramebufferRenderer(
+        renderer = std::make_unique<FramebufferRenderer>(
             renderingOptions.width,
             renderingOptions.height,
             renderingOptions.useDepth,
@@ -318,9 +312,9 @@ void Video::initializeRenderer(RenderingOptions renderingOptions) {
         );
     } else {
         if (renderingOptions.openglESVersion >= 3) {
-            renderer = new ImageRendererES3();
+            renderer = std::make_unique<ImageRendererES3>();
         } else {
-            renderer = new ImageRendererES2();
+            renderer = std::make_unique<ImageRendererES2>();
         }
     }
 

@@ -59,7 +59,7 @@ bool Audio::initializeStream() {
     if (result == oboe::Result::OK) {
         baseConversionFactor = (double) inputSampleRate / stream->getSampleRate();
         fifoBuffer = std::make_unique<oboe::FifoBuffer>(2, audioBufferSize);
-        temporaryAudioBuffer = std::unique_ptr<int16_t[]>(new int16_t[audioBufferSize]);
+        temporaryAudioBuffer = std::make_unique<int16_t[]>(static_cast<size_t>(audioBufferSize));
         latencyTuner = std::make_unique<oboe::LatencyTuner>(*stream);
         LOGI("Audio stream opened: sampleRate=%d, sharingMode=%d, bufSize=%d",
              stream->getSampleRate(), (int)stream->getSharingMode(), audioBufferSize);
@@ -113,18 +113,26 @@ void Audio::setPlaybackSpeed(const double newPlaybackSpeed) {
 }
 
 oboe::DataCallbackResult Audio::onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) {
+    if (numFrames <= 0 || !fifoBuffer || !temporaryAudioBuffer) {
+        return oboe::DataCallbackResult::Continue;
+    }
+
     double dynamicBufferFactor = computeDynamicBufferConversionFactor(0.001 * numFrames);
     double finalConversionFactor = baseConversionFactor * dynamicBufferFactor * playbackSpeed;
 
-    // When using low-latency stream, numFrames is very low (~100) and the dynamic buffer scaling doesn't work with rounding.
-    // By keeping track of the "fractional" frames we can keep the error smaller.
     framesToSubmit += numFrames * finalConversionFactor;
-    int32_t currentFramesToSubmit = std::round(framesToSubmit);
+    int32_t currentFramesToSubmit = static_cast<int32_t>(std::round(framesToSubmit));
+    if (currentFramesToSubmit < 0) currentFramesToSubmit = 0;
     framesToSubmit -= currentFramesToSubmit;
+
+    const int32_t bufferCapacity = static_cast<int32_t>(fifoBuffer->getBufferCapacityInFrames());
+    if (currentFramesToSubmit > bufferCapacity) {
+        currentFramesToSubmit = bufferCapacity;
+    }
 
     fifoBuffer->readNow(temporaryAudioBuffer.get(), currentFramesToSubmit * 2);
 
-    auto outputArray = reinterpret_cast<int16_t *>(audioData);
+    auto outputArray = reinterpret_cast<int16_t*>(audioData);
     resampler.resample(temporaryAudioBuffer.get(), currentFramesToSubmit, outputArray, numFrames);
 
     latencyTuner->tune();
@@ -166,11 +174,12 @@ void Audio::onErrorAfterClose(oboe::AudioStream* oldStream, oboe::Result result)
     AudioStreamErrorCallback::onErrorAfterClose(oldStream, result);
     LOGI("Stream error in oboe::onErrorAfterClose %s", oboe::convertToText(result));
 
-    if (result != oboe::Result::ErrorDisconnected)
-        return;
+    if (result != oboe::Result::ErrorDisconnected) return;
 
-    initializeStream();
-    if (startRequested) {
+    errorIntegral = 0.0;
+    framesToSubmit = 0.0;
+
+    if (initializeStream() && startRequested) {
         start();
     }
 }
