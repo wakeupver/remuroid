@@ -64,6 +64,8 @@ object ShaderChooser {
             SystemID.WSC -> ShaderConfig.LCD
             SystemID.NINTENDO_3DS -> ShaderConfig.LCD
             SystemID.DREAMCAST -> ShaderConfig.Default
+            SystemID.PSX -> ShaderConfig.CRT
+            SystemID.PSP -> ShaderConfig.LCD
         }
     }
 
@@ -286,6 +288,8 @@ object ShaderChooser {
             SystemID.WSC -> upscale16BitsMobile
             SystemID.NINTENDO_3DS -> modern
             SystemID.DREAMCAST -> modern
+            SystemID.PSP -> modern
+            SystemID.PSX -> upscale32Bits
         }
     }
 }

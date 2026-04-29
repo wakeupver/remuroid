@@ -38,6 +38,10 @@ import com.swordfish.touchinput.radial.layouts.Nintendo3DSLeft
 import com.swordfish.touchinput.radial.layouts.Nintendo3DSRight
 import com.swordfish.touchinput.radial.layouts.DreamcastLeft
 import com.swordfish.touchinput.radial.layouts.DreamcastRight
+import com.swordfish.touchinput.radial.layouts.PSXLeft
+import com.swordfish.touchinput.radial.layouts.PSXRight
+import com.swordfish.touchinput.radial.layouts.PSPLeft
+import com.swordfish.touchinput.radial.layouts.PSPRight
 import com.swordfish.touchinput.radial.layouts.PCELeft
 import com.swordfish.touchinput.radial.layouts.PCERight
 import com.swordfish.touchinput.radial.layouts.SMSLeft
@@ -74,6 +78,8 @@ enum class TouchControllerID {
     WS_PORTRAIT,
     NINTENDO_3DS,
     DREAMCAST,
+    PSX,
+    PSP,
     ;
 
     class Config(
@@ -226,6 +232,18 @@ enum class TouchControllerID {
                     Config(
                         { modifier, settings -> DreamcastLeft(modifier, settings) },
                         { modifier, settings -> DreamcastRight(modifier, settings) },
+                    )
+
+                PSX ->
+                    Config(
+                        { modifier, settings -> PSXLeft(modifier, settings) },
+                        { modifier, settings -> PSXRight(modifier, settings) },
+                    )
+
+                PSP ->
+                    Config(
+                        { modifier, settings -> PSPLeft(modifier, settings) },
+                        { modifier, settings -> PSPRight(modifier, settings) },
                     )
             }
         }

@@ -360,4 +360,39 @@ object ControllerConfigs {
                     TILT_CONFIGURATION_L2_R2,
                 ),
         )
+
+    val PSX =
+        ControllerConfig(
+            "psx_dualshock",
+            R.string.controller_default,
+            TouchControllerID.PSX,
+            // DualShock analog stick events must not merge with D-Pad so both can work simultaneously.
+            mergeDPADAndLeftStickEvents = false,
+            allowTouchRotation = true,
+            tiltConfigurations =
+                listOf(
+                    TILT_CONFIGURATION_DISABLED,
+                    TILT_CONFIGURATION_CROSS,
+                    TILT_CONFIGURATION_ANALOG_LEFT,
+                    TILT_CONFIGURATION_L_R,
+                    TILT_CONFIGURATION_L2_R2,
+                ),
+        )
+
+    val PSP =
+        ControllerConfig(
+            "psp_default",
+            R.string.controller_default,
+            TouchControllerID.PSP,
+            // PSP analog nub is separate from D-Pad
+            mergeDPADAndLeftStickEvents = false,
+            allowTouchRotation = true,
+            tiltConfigurations =
+                listOf(
+                    TILT_CONFIGURATION_DISABLED,
+                    TILT_CONFIGURATION_CROSS,
+                    TILT_CONFIGURATION_ANALOG_LEFT,
+                    TILT_CONFIGURATION_L_R,
+                ),
+        )
 }

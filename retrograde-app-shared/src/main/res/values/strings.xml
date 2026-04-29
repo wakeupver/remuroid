@@ -156,4 +156,30 @@
     <string name="value_flycast_alpha_sorting_perstrip">Per-strip (Fast)</string>
     <string name="value_flycast_alpha_sorting_pertriangle">Per-triangle (Accurate)</string>
 
+    <!-- PCSX-ReARMed (PSX) -->
+    <string name="value_pcsx_rearmed_frameskip_disabled">Disabled</string>
+    <string name="value_pcsx_rearmed_frameskip_1">1</string>
+    <string name="value_pcsx_rearmed_frameskip_2">2</string>
+    <string name="value_pcsx_rearmed_frameskip_3">3</string>
+    <string name="setting_pcsx_rearmed_duping_enable">Frame duplication</string>
+    <string name="setting_pcsx_rearmed_spu_reverb">SPU reverb</string>
+
+    <!-- SwanStation (PSX) -->
+    <string name="setting_swanstation_gpu_resolution_scale">Internal Resolution</string>
+    <string name="value_swanstation_gpu_renderer_auto">Automatic</string>
+    <string name="value_swanstation_gpu_renderer_software">Software</string>
+    <string name="value_swanstation_gpu_renderer_opengl">OpenGL</string>
+    <string name="value_swanstation_gpu_renderer_vulkan">Vulkan</string>
+    <string name="setting_swanstation_cpu_overclock">CPU Overclock</string>
+    <string name="setting_swanstation_gpu_pgxp">PGXP Geometry Correction</string>
+
+    <!-- PPSSPP (PSP) -->
+    <string name="setting_ppsspp_rendering_mode">Rendering mode</string>
+    <string name="value_ppsspp_rendering_mode_buffered">Buffered (accurate)</string>
+    <string name="value_ppsspp_rendering_mode_nonbuffered">Non-buffered (fast)</string>
+    <string name="value_ppsspp_internal_resolution_native">480×272 (Native)</string>
+    <string name="value_ppsspp_internal_resolution_2x">960×544 (2×)</string>
+    <string name="value_ppsspp_internal_resolution_3x">1440×816 (3×)</string>
+    <string name="value_ppsspp_internal_resolution_4x">1920×1088 (4×)</string>
+
 </resources>

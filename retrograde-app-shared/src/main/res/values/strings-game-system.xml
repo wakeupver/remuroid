@@ -43,6 +43,8 @@
     <string name="game_system_abbr_dos">DOS</string>
     <string name="game_system_abbr_3ds">3DS</string>
     <string name="game_system_abbr_dreamcast">DC</string>
+    <string name="game_system_abbr_psx">PS1</string>
+    <string name="game_system_abbr_psp">PSP</string>
 
     <string name="game_system_title_nes">Nintendo</string>
     <string name="game_system_title_atari2600">Atari 2600</string>
@@ -68,6 +70,8 @@
     <string name="game_system_title_dos">DOS (Beta)</string>
     <string name="game_system_title_3ds">Nintendo 3DS (Beta)</string>
     <string name="game_system_title_dreamcast">Dreamcast</string>
+    <string name="game_system_title_psx">PlayStation</string>
+    <string name="game_system_title_psp">PlayStation Portable</string>
 
     <string name="game_system_title_arcade">Arcade</string>
 </resources>

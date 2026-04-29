@@ -1254,6 +1254,224 @@ data class GameSystem(
                     supportedExtensions = listOf("cdi", "gdi", "chd", "cue"),
                     hasMultiDiskSupport = true,
                 ),
+                GameSystem(
+                    SystemID.PSX,
+                    "Sony - PlayStation",
+                    R.string.game_system_title_psx,
+                    R.string.game_system_abbr_psx,
+                    listOf(
+                        SystemCoreConfig(
+                            CoreID.PCSX_REARMED,
+                            exposedSettings =
+                                listOf(
+                                    ExposedSetting(
+                                        "pcsx_rearmed_frameskip",
+                                        R.string.setting_pcsx_rearmed_frameskip,
+                                        arrayListOf(
+                                            ExposedSetting.Value("0", R.string.value_pcsx_rearmed_frameskip_disabled),
+                                            ExposedSetting.Value("1", R.string.value_pcsx_rearmed_frameskip_1),
+                                            ExposedSetting.Value("2", R.string.value_pcsx_rearmed_frameskip_2),
+                                            ExposedSetting.Value("3", R.string.value_pcsx_rearmed_frameskip_3),
+                                        ),
+                                    ),
+                                ),
+                            exposedAdvancedSettings =
+                                listOf(
+                                    ExposedSetting(
+                                        "pcsx_rearmed_duping_enable",
+                                        R.string.setting_pcsx_rearmed_duping_enable,
+                                    ),
+                                    ExposedSetting(
+                                        "pcsx_rearmed_spu_reverb",
+                                        R.string.setting_pcsx_rearmed_spu_reverb,
+                                    ),
+                                ),
+                            // PCSX-ReARMed has internal HLE BIOS; real BIOS optional but recommended.
+                            requiredBIOSFiles = listOf(),
+                            controllerConfigs =
+                                hashMapOf(
+                                    0 to arrayListOf(ControllerConfigs.PSX),
+                                    1 to arrayListOf(ControllerConfigs.PSX),
+                                ),
+                            defaultSettings =
+                                listOf(
+                                    CoreVariable("pcsx_rearmed_drc", "enabled"),
+                                    CoreVariable("pcsx_rearmed_show_bios_bootlogo", "disabled"),
+                                    CoreVariable("pcsx_rearmed_frameskip", "0"),
+                                ),
+                            rumbleSupported = true,
+                            skipDuplicateFrames = false,
+                        ),
+                        SystemCoreConfig(
+                            CoreID.SWANSTATION,
+                            exposedSettings =
+                                listOf(
+                                    ExposedSetting(
+                                        "swanstation_GPU_Renderer",
+                                        R.string.setting_swanstation_gpu_renderer,
+                                        arrayListOf(
+                                            ExposedSetting.Value(
+                                                "Automatic",
+                                                R.string.value_swanstation_gpu_renderer_auto,
+                                            ),
+                                            ExposedSetting.Value(
+                                                "Software",
+                                                R.string.value_swanstation_gpu_renderer_software,
+                                            ),
+                                            ExposedSetting.Value(
+                                                "OpenGL",
+                                                R.string.value_swanstation_gpu_renderer_opengl,
+                                            ),
+                                            ExposedSetting.Value(
+                                                "Vulkan",
+                                                R.string.value_swanstation_gpu_renderer_vulkan,
+                                            ),
+                                        ),
+                                    ),
+                                    ExposedSetting(
+                                        "swanstation_GPU_ResolutionScale",
+                                        R.string.setting_swanstation_gpu_resolution_scale,
+                                    ),
+                                ),
+                            exposedAdvancedSettings =
+                                listOf(
+                                    ExposedSetting(
+                                        "swanstation_CPU_Overclock",
+                                        R.string.setting_swanstation_cpu_overclock,
+                                    ),
+                                    ExposedSetting(
+                                        "swanstation_GPU_PGXP",
+                                        R.string.setting_swanstation_gpu_pgxp,
+                                    ),
+                                ),
+                            requiredBIOSFiles =
+                                listOf(
+                                    "scph5500.bin",
+                                    "scph5501.bin",
+                                    "scph5502.bin",
+                                ),
+                            controllerConfigs =
+                                hashMapOf(
+                                    0 to arrayListOf(ControllerConfigs.PSX),
+                                    1 to arrayListOf(ControllerConfigs.PSX),
+                                ),
+                            defaultSettings =
+                                listOf(
+                                    CoreVariable("swanstation_CPU_Overclock", "100"),
+                                    CoreVariable("swanstation_GPU_ResolutionScale", "1"),
+                                ),
+                            rumbleSupported = true,
+                            skipDuplicateFrames = false,
+                            supportedOnlyArchitectures = setOf("arm64-v8a"),
+                        ),
+                    ),
+                    scanOptions =
+                        ScanOptions(
+                            scanByFilename = false,
+                            scanByUniqueExtension = false,
+                            scanByPathAndSupportedExtensions = true,
+                            scanBySimilarSerial = true,
+                        ),
+                    uniqueExtensions = listOf("pbp"),
+                    supportedExtensions = listOf("cue", "iso", "chd", "pbp", "bin"),
+                    hasMultiDiskSupport = true,
+                ),
+                GameSystem(
+                    SystemID.PSP,
+                    "Sony - PlayStation Portable",
+                    R.string.game_system_title_psp,
+                    R.string.game_system_abbr_psp,
+                    listOf(
+                        SystemCoreConfig(
+                            CoreID.PPSSPP,
+                            exposedSettings =
+                                listOf(
+                                    ExposedSetting(
+                                        "ppsspp_auto_frameskip",
+                                        R.string.setting_ppsspp_auto_frameskip,
+                                    ),
+                                    ExposedSetting(
+                                        "ppsspp_rendering_mode",
+                                        R.string.setting_ppsspp_rendering_mode,
+                                        arrayListOf(
+                                            ExposedSetting.Value(
+                                                "buffered",
+                                                R.string.value_ppsspp_rendering_mode_buffered,
+                                            ),
+                                            ExposedSetting.Value(
+                                                "nonbuffered",
+                                                R.string.value_ppsspp_rendering_mode_nonbuffered,
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            exposedAdvancedSettings =
+                                listOf(
+                                    ExposedSetting(
+                                        "ppsspp_internal_resolution",
+                                        R.string.setting_ppsspp_internal_resolution,
+                                        arrayListOf(
+                                            ExposedSetting.Value(
+                                                "480x272",
+                                                R.string.value_ppsspp_internal_resolution_native,
+                                            ),
+                                            ExposedSetting.Value(
+                                                "960x544",
+                                                R.string.value_ppsspp_internal_resolution_2x,
+                                            ),
+                                            ExposedSetting.Value(
+                                                "1440x816",
+                                                R.string.value_ppsspp_internal_resolution_3x,
+                                            ),
+                                            ExposedSetting.Value(
+                                                "1920x1088",
+                                                R.string.value_ppsspp_internal_resolution_4x,
+                                            ),
+                                        ),
+                                    ),
+                                    ExposedSetting(
+                                        "ppsspp_cpu_core",
+                                        R.string.setting_ppsspp_cpu_core,
+                                        arrayListOf(
+                                            ExposedSetting.Value(
+                                                "JIT",
+                                                R.string.value_ppsspp_cpu_core_jit,
+                                            ),
+                                            ExposedSetting.Value(
+                                                "IR JIT",
+                                                R.string.value_ppsspp_cpu_core_irjit,
+                                            ),
+                                            ExposedSetting.Value(
+                                                "Interpreter",
+                                                R.string.value_ppsspp_cpu_core_interpreter,
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            controllerConfigs =
+                                hashMapOf(
+                                    0 to arrayListOf(ControllerConfigs.PSP),
+                                ),
+                            defaultSettings =
+                                listOf(
+                                    CoreVariable("ppsspp_cpu_core", "JIT"),
+                                    CoreVariable("ppsspp_internal_resolution", "480x272"),
+                                    CoreVariable("ppsspp_auto_frameskip", "disabled"),
+                                ),
+                            rumbleSupported = true,
+                            supportedOnlyArchitectures = setOf("arm64-v8a"),
+                            skipDuplicateFrames = false,
+                        ),
+                    ),
+                    scanOptions =
+                        ScanOptions(
+                            scanByFilename = false,
+                            scanByUniqueExtension = false,
+                            scanByPathAndSupportedExtensions = true,
+                        ),
+                    uniqueExtensions = listOf("iso", "cso", "pbp"),
+                    supportedExtensions = listOf("iso", "cso", "pbp", "chd"),
+                ),
             )
 
         private val byIdCache by lazy { mapOf(*SYSTEMS.map { it.id.dbname to it }.toTypedArray()) }

@@ -85,13 +85,12 @@ class PPSSPPAssetsManager : CoreID.AssetsManager {
     }
 
     companion object {
-        const val PPSSPP_ASSETS_VERSION = "1.15"
+        // Track nightly downloads — bump this string whenever libretro ships a breaking assets change.
+        const val PPSSPP_ASSETS_VERSION = "nightly"
 
+        // PPSSPP assets hosted on the libretro buildbot (same archive RetroArch's online updater uses).
         val PPSSPP_ASSETS_URL: Uri =
-            Uri.parse("https://github.com/Swordfish90/LemuroidCores/")
-                .buildUpon()
-                .appendEncodedPath("raw/$PPSSPP_ASSETS_VERSION/assets/ppsspp.zip")
-                .build()
+            Uri.parse("https://buildbot.libretro.com/assets/ppsspp.zip")
 
         const val PPSSPP_ASSETS_VERSION_KEY = "ppsspp_assets_version_key"
 
