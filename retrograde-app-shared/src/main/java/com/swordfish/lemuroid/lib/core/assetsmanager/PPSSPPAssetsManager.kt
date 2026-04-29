@@ -46,16 +46,24 @@ class PPSSPPAssetsManager : CoreID.AssetsManager {
         response.body()?.use { zipInputStream ->
             while (true) {
                 val entry = zipInputStream.nextEntry ?: break
-                Timber.d("Writing file: ${entry.name}")
-                val destFile =
-                    File(
-                        coreAssetsDirectory,
-                        entry.name,
-                    )
+
+                // The libretro buildbot ZIP contains a top-level "PPSSPP/" root folder.
+                // We already extract into getAssetsDirectory() which IS the PPSSPP folder,
+                // so we strip the first path component to avoid double-nesting:
+                //   PPSSPP/assets/... → assets/...
+                val strippedName = entry.name
+                    .substringAfter('/')
+                    .takeIf { it.isNotEmpty() } ?: continue
+
+                Timber.d("Writing PPSSPP asset: $strippedName")
+
+                val destFile = File(coreAssetsDirectory, strippedName)
+
                 if (entry.isDirectory) {
                     destFile.mkdirs()
                 } else {
-                    zipInputStream.copyTo(destFile.outputStream())
+                    destFile.parentFile?.mkdirs()
+                    destFile.outputStream().use { out -> zipInputStream.copyTo(out) }
                 }
             }
         }
