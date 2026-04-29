@@ -26,7 +26,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 
 @Composable
-fun PadKitScope.PSXDualShockLeft(
+fun PadKitScope.PSXLeft(
     modifier: Modifier = Modifier,
     settings: TouchControllerSettingsManager.Settings,
 ) {
@@ -45,7 +45,7 @@ fun PadKitScope.PSXDualShockLeft(
 }
 
 @Composable
-fun PadKitScope.PSXDualShockRight(
+fun PadKitScope.PSXRight(
     modifier: Modifier = Modifier,
     settings: TouchControllerSettingsManager.Settings,
 ) {
