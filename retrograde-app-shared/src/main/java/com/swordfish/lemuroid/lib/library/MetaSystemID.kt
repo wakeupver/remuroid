@@ -108,6 +108,16 @@ enum class MetaSystemID(val titleResId: Int, val imageResId: Int, val systemIDs:
         R.drawable.game_system_dreamcast,
         listOf(SystemID.DREAMCAST),
     ),
+    PSX(
+        R.string.game_system_title_psx,
+        R.drawable.game_system_psx,
+        listOf(SystemID.PSX),
+    ),
+    PSP(
+        R.string.game_system_title_psp,
+        R.drawable.game_system_psp,
+        listOf(SystemID.PSP),
+    ),
     ;
 
     fun color(): Int {
@@ -141,6 +151,8 @@ enum class MetaSystemID(val titleResId: Int, val imageResId: Int, val systemIDs:
                 SystemID.WSC -> WS
                 SystemID.NINTENDO_3DS -> NINTENDO_3DS
                 SystemID.DREAMCAST -> DREAMCAST
+                SystemID.PSX -> PSX
+                SystemID.PSP -> PSP
             }
         }
     }
