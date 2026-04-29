@@ -1261,71 +1261,86 @@ data class GameSystem(
                     R.string.game_system_abbr_psx,
                     listOf(
                         SystemCoreConfig(
-                            CoreID.PCSX_REARMED,
+                            CoreID.SWANSTATION,
+                            // Only openbios.bin is truly required — it is open-source and
+                            // covers all regions as a fallback. If the user also places
+                            // scph5500.bin / scph5501.bin / scph5502.bin in the system dir
+                            // they will be preferred automatically via the BIOS path variables.
+                            requiredBIOSFiles = listOf("openbios.bin"),
+                            controllerConfigs =
+                                hashMapOf(
+                                    0 to arrayListOf(ControllerConfigs.PSX),
+                                    1 to arrayListOf(ControllerConfigs.PSX),
+                                ),
                             exposedSettings =
                                 listOf(
                                     ExposedSetting(
-                                        "pcsx_rearmed_frameskip",
-                                        R.string.setting_pcsx_rearmed_frameskip,
+                                        "swanstation_GPU_Renderer",
+                                        R.string.setting_swanstation_gpu_renderer,
                                         arrayListOf(
-                                            ExposedSetting.Value("0", R.string.value_pcsx_rearmed_frameskip_disabled),
-                                            ExposedSetting.Value("1", R.string.value_pcsx_rearmed_frameskip_1),
-                                            ExposedSetting.Value("2", R.string.value_pcsx_rearmed_frameskip_2),
-                                            ExposedSetting.Value("3", R.string.value_pcsx_rearmed_frameskip_3),
+                                            // Software is listed first and is the default.
+                                            // It is immune to EGL context loss, preventing
+                                            // the black-screen and crash that happen with
+                                            // OpenGL when the game-menu Activity steals focus.
+                                            ExposedSetting.Value(
+                                                "Software",
+                                                R.string.value_swanstation_gpu_renderer_software,
+                                            ),
+                                            ExposedSetting.Value(
+                                                "OpenGL",
+                                                R.string.value_swanstation_gpu_renderer_opengl,
+                                            ),
+                                        ),
+                                    ),
+                                    ExposedSetting(
+                                        "swanstation_GPU_ResolutionScale",
+                                        R.string.setting_swanstation_gpu_resolution_scale,
+                                        arrayListOf(
+                                            ExposedSetting.Value("1", "1x (Native)"),
+                                            ExposedSetting.Value("2", "2x"),
+                                            ExposedSetting.Value("4", "4x"),
+                                            ExposedSetting.Value("8", "8x"),
                                         ),
                                     ),
                                 ),
                             exposedAdvancedSettings =
                                 listOf(
                                     ExposedSetting(
-                                        "pcsx_rearmed_duping_enable",
-                                        R.string.setting_pcsx_rearmed_duping_enable,
+                                        "swanstation_CPU_Overclock_Enable",
+                                        R.string.setting_swanstation_cpu_overclock,
                                     ),
                                     ExposedSetting(
-                                        "pcsx_rearmed_spu_reverb",
-                                        R.string.setting_pcsx_rearmed_spu_reverb,
+                                        "swanstation_GPU_PGXP_Enable",
+                                        R.string.setting_swanstation_gpu_pgxp,
+                                    ),
+                                    ExposedSetting(
+                                        "swanstation_CDROM_ReadSpeedup",
+                                        R.string.setting_swanstation_cdrom_read_speedup,
                                     ),
                                 ),
-                            // PCSX-ReARMed has internal HLE BIOS; real BIOS optional but recommended.
-                            requiredBIOSFiles = listOf(),
-                            controllerConfigs =
-                                hashMapOf(
-                                    0 to arrayListOf(ControllerConfigs.PSX),
-                                    1 to arrayListOf(ControllerConfigs.PSX),
-                                ),
                             defaultSettings =
                                 listOf(
-                                    CoreVariable("pcsx_rearmed_drc", "enabled"),
-                                    CoreVariable("pcsx_rearmed_show_bios_bootlogo", "disabled"),
-                                    CoreVariable("pcsx_rearmed_frameskip", "0"),
-                                ),
-                            rumbleSupported = true,
-                            skipDuplicateFrames = false,
-                        ),
-                        SystemCoreConfig(
-                            CoreID.SWANSTATION,
-                            requiredBIOSFiles =
-                                listOf(
-                                    "scph5500.bin",
-                                    "scph5501.bin",
-                                    "scph5502.bin",
-                                    "openbios.bin",
-                                ),
-                            controllerConfigs =
-                                hashMapOf(
-                                    0 to arrayListOf(ControllerConfigs.PSX),
-                                    1 to arrayListOf(ControllerConfigs.PSX),
-                                ),
-                            defaultSettings =
-                                listOf(
-                                    CoreVariable("swanstation_BIOS_PathNTSCJ", "scph5500.bin"),
+                                    // Use Software renderer by default — fully avoids the
+                                    // EGL surface-loss bug (black screen + crash on menu open).
+                                    CoreVariable("swanstation_GPU_Renderer", "Software"),
+                                    // Point all regions at openbios.bin so the game always
+                                    // boots even without proprietary BIOS files. If the user
+                                    // drops scph5500/5501/5502.bin in the system folder,
+                                    // they can override these via Core Options.
+                                    CoreVariable("swanstation_BIOS_PathNTSCJ", "openbios.bin"),
                                     CoreVariable("swanstation_BIOS_PathNTSCU", "openbios.bin"),
-                                    CoreVariable("swanstation_BIOS_PathPAL", "scph5502.bin"),
-                                    CoreVariable("swanstation_GPU_Renderer", "OpenGL"),
+                                    CoreVariable("swanstation_BIOS_PathPAL", "openbios.bin"),
+                                    CoreVariable("swanstation_BIOS_PatchFastBoot", "true"),
+                                    CoreVariable("swanstation_GPU_ResolutionScale", "1"),
+                                    CoreVariable("swanstation_CPU_Overclock_Enable", "false"),
+                                    CoreVariable("swanstation_GPU_PGXP_Enable", "false"),
                                 ),
                             rumbleSupported = true,
                             skipDuplicateFrames = false,
                             supportedOnlyArchitectures = setOf("arm64-v8a"),
+                            // Show all SwanStation variables in Core Options so power users
+                            // can tweak BIOS paths, PGXP, overclock, etc.
+                            autoDetectSettings = true,
                         ),
                     ),
                     scanOptions =

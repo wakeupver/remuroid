@@ -97,6 +97,11 @@ class CoresSelection(
                 CoreID.MELONDS.coreName
             }
         }
+        // PSX now uses SwanStation exclusively. If a user had PCSX-ReARMed stored as
+        // their preference from a previous install, override it so the game loads correctly.
+        if (system.id == SystemID.PSX) {
+            return CoreID.SWANSTATION.coreName
+        }
         return system.systemCoreConfigs.first().coreID.coreName
     }
 

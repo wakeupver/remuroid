@@ -171,6 +171,40 @@ class BiosManager(private val directoriesManager: DirectoriesManager) {
                     "B7E5ACED",
                     "dc_flash.bin",
                 ),
+                // PlayStation BIOS files used by SwanStation.
+                // openbios.bin has no fixed CRC (any build is accepted).
+                Bios(
+                    "openbios.bin",
+                    "",   // No fixed MD5 — any build of OpenBIOS is accepted
+                    "PlayStation OpenBIOS (All regions)",
+                    SystemID.PSX,
+                    null, // No fixed CRC32
+                    "openbios.bin",
+                ),
+                Bios(
+                    "scph5500.bin",
+                    "8DD7D5296A650FAC7319BCE665A6A53C",
+                    "PlayStation BIOS v3.0 NTSC-J",
+                    SystemID.PSX,
+                    "FF3EEB8C",
+                    "scph5500.bin",
+                ),
+                Bios(
+                    "scph5501.bin",
+                    "490F666E1AFB15B7362B406ED1CEA246",
+                    "PlayStation BIOS v3.0 NTSC-U",
+                    SystemID.PSX,
+                    "8D8CB7E4",
+                    "scph5501.bin",
+                ),
+                Bios(
+                    "scph5502.bin",
+                    "32736F17079D0B2B7024407C39BD3050",
+                    "PlayStation BIOS v3.0 PAL",
+                    SystemID.PSX,
+                    "D786F0B9",
+                    "scph5502.bin",
+                ),
             )
     }
 }
