@@ -28,7 +28,7 @@ object DocumentFileParser {
         context: Context,
         baseStorageFile: BaseStorageFile,
     ): StorageFile {
-        return if (baseStorageFile.extension == "zip") {
+        return if (baseStorageFile.extension.lowercase() == "zip") {
             Timber.d("Detected zip file. ${baseStorageFile.name}")
             parseZipFile(context, baseStorageFile)
         } else {
@@ -87,12 +87,18 @@ object DocumentFileParser {
         context.contentResolver.openInputStream(baseStorageFile.uri)?.use { rawStream ->
             if (shouldComputeCrc) {
                 // Single-pass: compute CRC while also extracting serial info.
-                // We wrap the raw stream in a CRC-accumulating stream, then hand a
-                // non-closing view of it to SerialScanner so it doesn't close our
-                // underlying stream after reading just the header bytes.
+                // nonClosing wraps checkedStream so that when SerialScanner calls
+                // close() on its internal BufferedInputStream, the close() call
+                // reaches NonClosingInputStream and becomes a no-op — keeping
+                // checkedStream (and its CRC accumulator) alive for the drain below.
+                //
+                // IMPORTANT: nonClosing must NOT itself be a BufferedInputStream.
+                // If it were, SerialScanner's inner close() would propagate into
+                // BufferedInputStream.close(), nulling buf/in and making subsequent
+                // reads throw "Stream closed", which would silently skip the file.
                 val crcAccumulator = CRC32()
                 val checkedStream = CheckedInputStream(rawStream, crcAccumulator)
-                val nonClosing = NonClosingInputStream(checkedStream).buffered(CRC_BUFFER_SIZE)
+                val nonClosing = NonClosingInputStream(checkedStream)
 
                 diskInfo = SerialScanner.extractInfo(baseStorageFile.name, nonClosing)
 
