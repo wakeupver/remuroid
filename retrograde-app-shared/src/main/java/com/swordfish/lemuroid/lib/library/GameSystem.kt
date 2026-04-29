@@ -1261,7 +1261,7 @@ data class GameSystem(
             val mutableMap = mutableMapOf<String, GameSystem>()
             for (system in SYSTEMS) {
                 for (extension in system.uniqueExtensions) {
-                    mutableMap[extension.toLowerCase(Locale.US)] = system
+                    mutableMap[extension.lowercase(Locale.US)] = system
                 }
             }
             mutableMap.toMap()
@@ -1280,7 +1280,7 @@ data class GameSystem(
         }
 
         fun findByUniqueFileExtension(fileExtension: String): GameSystem? =
-            byExtensionCache[fileExtension.toLowerCase(Locale.US)]
+            byExtensionCache[fileExtension.lowercase(Locale.US)]
 
         data class ScanOptions(
             val scanByFilename: Boolean = true,

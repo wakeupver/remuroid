@@ -42,6 +42,7 @@ object DocumentFileParser {
         baseStorageFile: BaseStorageFile,
     ): StorageFile {
         val inputStream = context.contentResolver.openInputStream(baseStorageFile.uri)
+            ?: return parseStandardFile(context, baseStorageFile)
         return ZipInputStream(inputStream).use {
             val gameEntry = findGameEntry(it, baseStorageFile.size)
             if (gameEntry != null) {
