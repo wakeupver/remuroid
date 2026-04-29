@@ -1239,7 +1239,7 @@ data class GameSystem(
                                 listOf(
                                     CoreVariable("reicast_internal_resolution", "640x480"),
                                     CoreVariable("reicast_alpha_sorting", "per-triangle (normal)"),
-                                    CoreVariable("reicast_detect_vsync_swap_interval", "enabled"),
+                                    CoreVariable("reicast_threaded_rendering", "disabled"),
                                 ),
                             statesVersion = 1,
                         ),
@@ -1304,51 +1304,12 @@ data class GameSystem(
                         ),
                         SystemCoreConfig(
                             CoreID.SWANSTATION,
-                            exposedSettings =
-                                listOf(
-                                    ExposedSetting(
-                                        "swanstation_GPU_Renderer",
-                                        R.string.setting_swanstation_gpu_renderer,
-                                        arrayListOf(
-                                            ExposedSetting.Value(
-                                                "Automatic",
-                                                R.string.value_swanstation_gpu_renderer_auto,
-                                            ),
-                                            ExposedSetting.Value(
-                                                "Software",
-                                                R.string.value_swanstation_gpu_renderer_software,
-                                            ),
-                                            ExposedSetting.Value(
-                                                "OpenGL",
-                                                R.string.value_swanstation_gpu_renderer_opengl,
-                                            ),
-                                            ExposedSetting.Value(
-                                                "Vulkan",
-                                                R.string.value_swanstation_gpu_renderer_vulkan,
-                                            ),
-                                        ),
-                                    ),
-                                    ExposedSetting(
-                                        "swanstation_GPU_ResolutionScale",
-                                        R.string.setting_swanstation_gpu_resolution_scale,
-                                    ),
-                                ),
-                            exposedAdvancedSettings =
-                                listOf(
-                                    ExposedSetting(
-                                        "swanstation_CPU_Overclock",
-                                        R.string.setting_swanstation_cpu_overclock,
-                                    ),
-                                    ExposedSetting(
-                                        "swanstation_GPU_PGXP",
-                                        R.string.setting_swanstation_gpu_pgxp,
-                                    ),
-                                ),
                             requiredBIOSFiles =
                                 listOf(
                                     "scph5500.bin",
                                     "scph5501.bin",
                                     "scph5502.bin",
+                                    "openbios.bin",
                                 ),
                             controllerConfigs =
                                 hashMapOf(
@@ -1357,8 +1318,10 @@ data class GameSystem(
                                 ),
                             defaultSettings =
                                 listOf(
-                                    CoreVariable("swanstation_CPU_Overclock", "100"),
-                                    CoreVariable("swanstation_GPU_ResolutionScale", "1"),
+                                    CoreVariable("swanstation_BIOS_PathNTSCJ", "scph5500.bin"),
+                                    CoreVariable("swanstation_BIOS_PathNTSCU", "openbios.bin"),
+                                    CoreVariable("swanstation_BIOS_PathPAL", "scph5502.bin"),
+                                    CoreVariable("swanstation_GPU_Renderer", "OpenGL"),
                                 ),
                             rumbleSupported = true,
                             skipDuplicateFrames = false,

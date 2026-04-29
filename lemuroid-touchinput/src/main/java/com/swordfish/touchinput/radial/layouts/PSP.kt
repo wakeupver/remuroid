@@ -1,12 +1,14 @@
 package com.swordfish.touchinput.radial.layouts
 
 import android.view.KeyEvent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
+import com.swordfish.touchinput.controller.R
+import com.swordfish.touchinput.radial.controls.LemuroidControlCross
 import com.swordfish.touchinput.radial.controls.LemuroidControlFaceButtons
 import com.swordfish.touchinput.radial.layouts.shared.ComposeTouchLayouts
-import com.swordfish.touchinput.radial.controls.LemuroidControlCross
 import com.swordfish.touchinput.radial.layouts.shared.SecondaryAnalogLeft
 import com.swordfish.touchinput.radial.layouts.shared.SecondaryButtonL
 import com.swordfish.touchinput.radial.layouts.shared.SecondaryButtonMenu
@@ -29,14 +31,11 @@ fun PadKitScope.PSPLeft(
     BaseLayoutLeft(
         settings = settings,
         modifier = modifier,
-        primaryDial = {
-            LemuroidControlCross(id = Id.DiscreteDirection(ComposeTouchLayouts.MOTION_SOURCE_DPAD))
-        },
+        primaryDial = { LemuroidControlCross(id = Id.DiscreteDirection(ComposeTouchLayouts.MOTION_SOURCE_DPAD)) },
         secondaryDials = {
             SecondaryButtonL()
-            SecondaryButtonSelect()
+            SecondaryButtonSelect(position = 2)
             SecondaryButtonMenuPlaceholder(settings)
-            // PSP analog nub — left stick
             SecondaryAnalogLeft()
         },
     )
@@ -54,23 +53,49 @@ fun PadKitScope.PSPRight(
             LemuroidControlFaceButtons(
                 ids =
                     persistentListOf(
-                        Id.Key(KeyEvent.KEYCODE_BUTTON_B),   // Cross  (bottom)
-                        Id.Key(KeyEvent.KEYCODE_BUTTON_A),   // Circle (right)
-                        Id.Key(KeyEvent.KEYCODE_BUTTON_Y),   // Triangle (top)
-                        Id.Key(KeyEvent.KEYCODE_BUTTON_X),   // Square (left)
+                        Id.Key(KeyEvent.KEYCODE_BUTTON_A),
+                        Id.Key(KeyEvent.KEYCODE_BUTTON_B),
+                        Id.Key(KeyEvent.KEYCODE_BUTTON_Y),
+                        Id.Key(KeyEvent.KEYCODE_BUTTON_X),
                     ),
                 idsForegrounds =
                     persistentMapOf<Id.Key, @Composable (State<Boolean>) -> Unit>(
-                        Id.Key(KeyEvent.KEYCODE_BUTTON_B) to { LemuroidButtonForeground(pressed = it, label = "×") },
-                        Id.Key(KeyEvent.KEYCODE_BUTTON_A) to { LemuroidButtonForeground(pressed = it, label = "○") },
-                        Id.Key(KeyEvent.KEYCODE_BUTTON_Y) to { LemuroidButtonForeground(pressed = it, label = "△") },
-                        Id.Key(KeyEvent.KEYCODE_BUTTON_X) to { LemuroidButtonForeground(pressed = it, label = "□") },
+                        Id.Key(KeyEvent.KEYCODE_BUTTON_A) to {
+                            LemuroidButtonForeground(
+                                pressed = it,
+                                icon = R.drawable.psx_circle,
+                            )
+                        },
+                        Id.Key(KeyEvent.KEYCODE_BUTTON_B) to {
+                            LemuroidButtonForeground(
+                                pressed = it,
+                                icon = R.drawable.psx_cross,
+                            )
+                        },
+                        Id.Key(KeyEvent.KEYCODE_BUTTON_Y) to {
+                            LemuroidButtonForeground(
+                                pressed = it,
+                                icon = R.drawable.psx_square,
+                            )
+                        },
+                        Id.Key(KeyEvent.KEYCODE_BUTTON_X) to {
+                            LemuroidButtonForeground(
+                                pressed = it,
+                                icon = R.drawable.psx_triangle,
+                            )
+                        },
                     ),
             )
         },
         secondaryDials = {
             SecondaryButtonR()
-            SecondaryButtonStart()
+            SecondaryButtonStart(position = 2)
+            Box(
+                modifier =
+                    Modifier
+                        .radialPosition(+80f - 180f)
+                        .radialScale(2.0f),
+            )
             SecondaryButtonMenu(settings)
         },
     )

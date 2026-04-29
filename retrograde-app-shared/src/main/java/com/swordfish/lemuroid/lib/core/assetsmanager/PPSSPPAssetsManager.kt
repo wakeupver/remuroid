@@ -90,7 +90,7 @@ class PPSSPPAssetsManager : CoreID.AssetsManager {
 
         // PPSSPP assets hosted on the libretro buildbot (same archive RetroArch's online updater uses).
         val PPSSPP_ASSETS_URL: Uri =
-            Uri.parse("https://buildbot.libretro.com/assets/ppsspp.zip")
+            Uri.parse("https://buildbot.libretro.com/assets/system/PPSSPP.zip")
 
         const val PPSSPP_ASSETS_VERSION_KEY = "ppsspp_assets_version_key"
 
