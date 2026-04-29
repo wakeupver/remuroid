@@ -172,6 +172,10 @@
     <string name="value_swanstation_gpu_renderer_vulkan">Vulkan</string>
     <string name="setting_swanstation_cpu_overclock">CPU Overclock</string>
     <string name="setting_swanstation_gpu_pgxp">PGXP Geometry Correction</string>
+    <string name="value_swanstation_resolution_scale_1x">1× (Native)</string>
+    <string name="value_swanstation_resolution_scale_2x">2×</string>
+    <string name="value_swanstation_resolution_scale_4x">4×</string>
+    <string name="value_swanstation_resolution_scale_8x">8×</string>
 
     <!-- PPSSPP (PSP) -->
     <string name="setting_ppsspp_rendering_mode">Rendering mode</string>
