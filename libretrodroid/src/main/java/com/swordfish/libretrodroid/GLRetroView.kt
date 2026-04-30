@@ -366,7 +366,19 @@ class GLRetroView(
         override fun onSurfaceCreated(gl: GL10, config: EGLConfig) = catchExceptions {
             Thread.currentThread().priority = Thread.MAX_PRIORITY
             Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY)
-            initializeCore()
+            if (isGameLoaded) {
+                // EGL context was recreated while the game was already running
+                // (e.g. GameMenuActivity or another Activity stole focus and the
+                // driver destroyed the surface despite preserveEGLContextOnPause=true).
+                // We must reinitialise the video layer and fire hw_context_reset so
+                // that HW-rendered cores (e.g. SwanStation with OpenGL renderer) can
+                // rebuild their framebuffers/textures against the new GL context.
+                // Skipping this call leaves the core pointing at deleted GL objects
+                // and produces a permanent black screen on resume.
+                LibretroDroid.onSurfaceCreated()
+            } else {
+                initializeCore()
+            }
             lifecycle?.coroutineScope?.launch {
                 retroGLEventsSubject.emit(GLRetroEvents.SurfaceCreated)
             }
