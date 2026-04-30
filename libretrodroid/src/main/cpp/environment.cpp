@@ -151,6 +151,24 @@ bool Environment::environment_handle_set_controller_info(const struct retro_cont
 }
 
 bool Environment::environment_handle_set_hw_render(struct retro_hw_render_callback* hw_render_callback) {
+    // Android only supports OpenGL ES — desktop GL contexts do not exist here.
+    // Cores such as SwanStation request RETRO_HW_CONTEXT_OPENGL_CORE (3) or
+    // RETRO_HW_CONTEXT_OPENGL (1) when the user picks the "OpenGL" renderer,
+    // ignoring our RETRO_ENVIRONMENT_GET_PREFERRED_HW_RENDER hint.  If we
+    // accept those context types unchanged the core compiles shaders with
+    // desktop-GL "#version NNN core" directives that Adreno GLES rejects with
+    // "ERROR: Invalid #version", producing a permanent black screen.
+    //
+    // Fix: transparently remap any desktop-GL context type to OPENGLES3.
+    // GLSurfaceView provides a real GLES 3.x context, so the mapping is valid.
+    // SwanStation reads hw_render_callback->context_type back after SET_HW_RENDER
+    // and will switch to its GLES3 shader compilation path.
+    const auto requested = hw_render_callback->context_type;
+    if (requested == RETRO_HW_CONTEXT_OPENGL || requested == RETRO_HW_CONTEXT_OPENGL_CORE) {
+        LOGD("SET_HW_RENDER: remapping desktop GL context type %u -> OPENGLES3", (unsigned)requested);
+        hw_render_callback->context_type = RETRO_HW_CONTEXT_OPENGLES3;
+    }
+
     useHWAcceleration = true;
     useDepth = hw_render_callback->depth;
     useStencil = hw_render_callback->stencil;
