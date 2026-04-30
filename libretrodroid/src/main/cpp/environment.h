@@ -124,7 +124,11 @@ private:
 private:
     retro_hw_context_reset_t hw_context_reset = nullptr;
     retro_hw_context_reset_t hw_context_destroy = nullptr;
-    struct retro_disk_control_callback *retro_disk_control_callback = nullptr;
+    // Stored by value to avoid dangling-pointer crash (SwanStation passes a
+    // stack-allocated struct during retro_set_environment; the raw pointer
+    // becomes invalid as soon as that call returns).
+    struct retro_disk_control_callback retro_disk_control_callback_copy = {};
+    bool retro_disk_control_available = false;
 
     std::string savesDirectory;
     std::string systemDirectory;

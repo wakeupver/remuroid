@@ -298,8 +298,41 @@ bool Environment::handle_callback_environment(unsigned cmd, void *data) {
         }
 
         case RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE: {
-            LOGD("Called RETRO_ENVIRONMENT_SET_ROTATION");
-            retro_disk_control_callback = static_cast<struct retro_disk_control_callback*>(data);
+            LOGD("Called RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE");
+            // Copy by value: the core may pass a pointer to a stack-allocated struct
+            // (SwanStation does this).  Storing the raw pointer causes a dangling-pointer
+            // crash the next time getRetroDiskControlCallback() is called (e.g. when the
+            // in-game menu is opened).
+            if (data != nullptr) {
+                retro_disk_control_callback_copy =
+                        *static_cast<struct retro_disk_control_callback *>(data);
+                retro_disk_control_available = true;
+            } else {
+                retro_disk_control_available = false;
+            }
+            return true;
+        }
+
+        case RETRO_ENVIRONMENT_SET_DISK_CONTROL_EXT_INTERFACE: {
+            LOGD("Called RETRO_ENVIRONMENT_SET_DISK_CONTROL_EXT_INTERFACE");
+            // SwanStation (and other modern cores) use the extended interface.
+            // Map the first seven fields — which are identical to the base
+            // retro_disk_control_callback — so the rest of the code can call
+            // them through the existing callback struct without modification.
+            if (data != nullptr) {
+                const auto *ext =
+                        static_cast<const struct retro_disk_control_ext_callback *>(data);
+                retro_disk_control_callback_copy.set_eject_state    = ext->set_eject_state;
+                retro_disk_control_callback_copy.get_eject_state    = ext->get_eject_state;
+                retro_disk_control_callback_copy.get_image_index    = ext->get_image_index;
+                retro_disk_control_callback_copy.set_image_index    = ext->set_image_index;
+                retro_disk_control_callback_copy.get_num_images     = ext->get_num_images;
+                retro_disk_control_callback_copy.replace_image_index = ext->replace_image_index;
+                retro_disk_control_callback_copy.add_image_index    = ext->add_image_index;
+                retro_disk_control_available = true;
+            } else {
+                retro_disk_control_available = false;
+            }
             return true;
         }
 
@@ -400,7 +433,10 @@ retro_hw_context_reset_t Environment::getHwContextDestroy() const {
 }
 
 struct retro_disk_control_callback* Environment::getRetroDiskControlCallback() const {
-    return retro_disk_control_callback;
+    if (!retro_disk_control_available) return nullptr;
+    // Cast away const: the struct is stored by value in this object and the
+    // callers need a non-const pointer to invoke the function pointers inside.
+    return const_cast<struct retro_disk_control_callback *>(&retro_disk_control_callback_copy);
 }
 
 int Environment::getPixelFormat() const {
