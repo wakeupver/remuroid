@@ -1322,7 +1322,7 @@ data class GameSystem(
                                 listOf(
                                     // Use Software renderer by default — fully avoids the
                                     // EGL surface-loss bug (black screen + crash on menu open).
-                                    CoreVariable("swanstation_GPU_Renderer", "Software"),
+                                    CoreVariable("swanstation_GPU_Renderer", "Auto"),
                                     // Point all regions at openbios.bin so the game always
                                     // boots even without proprietary BIOS files. If the user
                                     // drops scph5500/5501/5502.bin in the system folder,
