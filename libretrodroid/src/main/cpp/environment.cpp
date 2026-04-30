@@ -46,7 +46,8 @@ void Environment::deinitialize() {
     hw_context_reset = nullptr;
     hw_context_destroy = nullptr;
 
-    retro_disk_control_callback = nullptr;
+    retro_disk_control_callback_copy = {};
+    retro_disk_control_available = false;
 
     savesDirectory = std::string();
     systemDirectory = std::string();
